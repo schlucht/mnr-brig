@@ -24,6 +24,18 @@ type config struct {
 	}
 }
 
+const (
+	MsgTypeSuccess = iota
+	MsgTypeError
+	MsgTypeWarning
+	MsgTypeInfo
+)
+
+type message struct {
+	message string
+	msgType int
+}
+
 type application struct {
 	config        config
 	infoLog       *log.Logger

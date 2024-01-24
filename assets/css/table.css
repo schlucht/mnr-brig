@@ -35,6 +35,8 @@ table{
         margin: 0.5rem 0.2rem;
         cursor: pointer;
         border-radius: 0.5rem;
+        height: 3.2rem;
+        width: 3.2rem;
         &:hover {
             background-color: #45a049;
         }

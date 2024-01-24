@@ -23,7 +23,8 @@ func (app *application) routes() http.Handler {
 	// Books routes
 	mux.Get("/books", app.Books)
 	mux.Post("/books", app.SaveBook)
-	mux.Delete("/books/:id", app.SaveBook)
+	mux.Delete("/books/:id", app.DeleteBook)
+	mux.Get("/books/:id", app.GetBook)
 
 	// Donate routes
 	mux.Get("/donate", app.Donate)

@@ -6,53 +6,66 @@ form {
         display: flex;
         flex-direction: column;
         justify-content: center;
-        align-items: left;
+        align-items: flex-start;
         gap: .1rem;
-        margin-top: 1rem;
-        background-color: var(--color-gray-dark);
-        border-radius: 0.5rem;
-        
-        & input {
-            width: 100%;
-            padding: 0.5rem;
-            border: solid 1px var(--color-gray-dark);
-            border-radius: 0.5rem;
-            font-size: 1.6rem;
-            color: var(--color-black);
-            &:focus {
-                outline: none;
-                border: solid 1px var(--color-primary);
-            }
-        }
-        & textarea {
-            width: 100%;
-            padding: 0.5rem;
-            border: solid 1px var(--color-gray-dark);
-            border-radius: 0.5rem;
-            font-size: 1.6rem;
-            &:focus {
-                outline: none;
-                border: solid 1px var(--color-gray-primary);
-            }
-        }
-        & button {
-            width: 100%;
-            padding: 0.5rem;
-            border: solid 1px var(--color-gray-dark);
-            border-radius: 0.5rem;
-            font-size: 1.6rem;
-            background-color: var(--color-gray-dark);
-            color: var(--color-white);
-            cursor: pointer;
-            &:hover {
-                background-color: rgba(0,0,0,.1);
-                color: var(--color-white);
-            }
-        }
+        margin-top: 1rem;        
+        border-radius: 0.5rem; 
     }
 }
+
+
+
+input {
+    width: 100%;
+    padding: 0.5rem;
+    border: solid 1px var(--color-gray-dark);    
+    border-radius: 0.5rem;
+    font-size: 1.6rem;
+    color: var(--color-black);
+    &:focus {
+        outline: none;
+        border: solid 1px var(--color-primary);
+    }   
+    &:required{
+        background-color:  var(--color-red);
+    }
+    &:valid{
+        border: solid 1px var(--color-green);
+    }  
+}
+
+
+textarea {
+    width: 100%;
+    padding: 0.5rem;
+    border: solid 1px var(--color-gray-dark);
+    border-radius: 0.5rem;
+    font-size: 1.6rem;
+    &:focus {
+        outline: none;
+        border: solid 1px var(--color-gray-primary);
+    }
+}
+button {
+    width: 100%;
+    padding: 0.5rem;
+    border: solid 1px var(--color-gray-dark);
+    border-radius: 0.5rem;
+    font-size: 1.6rem;
+    background-color: var(--color-gray-dark);
+    color: var(--color-white);
+    cursor: pointer;
+    &:hover {
+        background-color: rgba(0,0,0,.1);
+        color: var(--color-white);
+    }
+}
+
 label {
     font-size: 1.6rem;
     font-weight: 600;
-    margin-bottom: 0.5rem;
+    padding: 0.2rem 0.5rem;
+    background-color: var(--color-gray-dark);
+    border-radius: 0.5rem;
+    width: 99.9%;
 }

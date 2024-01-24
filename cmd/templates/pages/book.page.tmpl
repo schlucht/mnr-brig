@@ -9,14 +9,16 @@
     <section class="book">
         <div class="book-form border">
             <h3>Neue Bücher</h3>
-            <form action="/books" method="POST">
+            <form action="/books" method="POST" id="frmBook">
                 <div class="controlItems">
                     <label for="title">Titel</label>
-                    <input type="text" name="title" id="title">
+                    <input class="error" type="text" name="title" id="title">
+                    <ul id="error_title"></ul>
                 </div>
                 <div class="controlItems">
                     <label for="price">Buch Preis</label>
-                    <input type="text" name="price" id="price">
+                    <input class="error" type="number" name="price" id="price">
+                    <ul id="error_price"></ul>
                 </div>
                 <div class="controlItems">
                     <button type="submit">Buch hinzufügen</button>
@@ -26,5 +28,25 @@
         <div class="book-list border">
             {{ block "booklist" .}}{{end}}
         </div>
+        <script>
+           frmBook.addEventListener("submit", (e) => {
+            e.preventDefault();
+            const title = document.getElementById("title").value;
+            const price = document.getElementById("price").value;
+            const error_title = document.getElementById("error_title");
+            const error_price = document.getElementById("error_price");
+
+            if (!required(title) || !required(price)) {
+                error_title.insertAdjacentElement("beforeend", createLi("Bitte alle Felder ausfüllen"));
+                return;
+            }
+           })
+           const required = value => value === '' ? false : true;
+           const createLi = (text) => {
+               const li = document.createElement("li");
+               li.innerHTML = text;
+               return li;
+           }
+        </script>
     </section>
 {{ end }}
