@@ -1,0 +1,15 @@
+
+.book {
+    display: flex;
+    flex-direction: row;
+}
+.book-form {  
+    background-color: var(--color-gray-light);
+    flex: 1;
+    padding: 1rem;
+}
+.book-list {
+    flex: 2;
+    margin-left: .4rem;
+    padding: 1rem;
+}

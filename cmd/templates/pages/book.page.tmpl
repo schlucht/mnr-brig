@@ -1,0 +1,30 @@
+{{template "base" .}}
+
+{{ define "title" }}
+    MNR - Naters - Bücher
+{{ end }}
+
+{{ define "content" }} 
+    <h2>MNR Bücher</h2>    
+    <section class="book">
+        <div class="book-form border">
+            <h3>Neue Bücher</h3>
+            <form action="/books" method="POST">
+                <div class="controlItems">
+                    <label for="title">Titel</label>
+                    <input type="text" name="title" id="title">
+                </div>
+                <div class="controlItems">
+                    <label for="price">Buch Preis</label>
+                    <input type="text" name="price" id="price">
+                </div>
+                <div class="controlItems">
+                    <button type="submit">Buch hinzufügen</button>
+                </div>
+            </form>
+        </div>  
+        <div class="book-list border">
+            {{ block "booklist" .}}{{end}}
+        </div>
+    </section>
+{{ end }}

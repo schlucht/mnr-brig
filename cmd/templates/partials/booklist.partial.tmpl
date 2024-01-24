@@ -1,0 +1,58 @@
+{{ define "booklist" }}
+<h3>Bücherliste</h3>
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Titel</th>
+            <th>Preis</th>
+            <th> - </th>   
+        </tr>
+    </thead>
+    <tbody>
+        {{range index .Data "books" }}
+        <tr>
+            <td>{{ .ID }}</td>
+            <td>{{ .Title }}</td>
+            <td>{{ .Price }}</td>
+            <td>
+                <div class="book-admin">
+                    <button class="book-button">
+                        <img src="./assets/icons/pencil.svg" alt="edit">
+                    </button>
+                    <button id="delete" class="book-button">
+                        <img src="./assets/icons/delete.svg" alt="edit">
+                    </button>
+                    <button class="book-button">
+                        <img src="./assets/icons/dollar_white.svg" alt="edit">
+                    </button>
+                </div>
+            </td>
+        </tr>
+        {{ end }}
+    </tbody>
+</table>
+
+
+<script>
+    const deleteButton = document.getElementById("delete");
+    deleteButton.addEventListener("click", () => {
+        console.log("delete button clicked");
+        fetch("/books", {
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                id: deleteButton.textContent,
+            }),
+        })
+        .then((res) => res.json())
+        .then((data) => {
+            console.log(data);
+            window.location.reload();
+        })
+        .catch((err) => console.log(err));
+    });
+</script>
+{{ end }}

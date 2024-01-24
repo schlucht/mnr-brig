@@ -1,0 +1,31 @@
+{{template "base" .}}
+
+{{ define "title" }}
+    MNR - Spende einnahmen
+{{ end }}
+
+{{ define "content" }} 
+    <h2>Spendeeinnahmen</h2>    
+    <hr>
+    <div class="container">
+        <h3>Neue Spende</h3>
+        <form action="/donate" method="POST">
+            <div class="controlItems">
+                <label for="date">Titel</label>
+                <input type="date" name="date" id="date">
+            </div>
+            <div class="controlItems">
+                <label for="price">Spende</label>
+                <input type="text" name="price" id="price">
+            </div>
+            <div class="controlItems">                
+                <textarea name="desc" id="desc" cols="30" rows="10">Beschreibung</textarea>
+            </div>
+            <button type="submit">Spende hinzufügen</button>
+        </form>
+    </div>    
+    <hr>
+    <div class="container">
+        {{ block "donatelist" .}}{{end}}
+    </div>
+{{ end }}
