@@ -8,94 +8,100 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-func (app *application) Books(w http.ResponseWriter, r *http.Request) {
+type book struct {
+	Id    int
+	Title string
+	Price float64
+}
 
-	data, err := app.loadAllBooks()
+func (app *application) Book(w http.ResponseWriter, r *http.Request) {
+
+	if err := app.renderTemplate(w, r, "book", &templateData{}, "booklist"); err != nil {
+		app.errorlog.Println(err)
+	}
+}
+
+func (app *application) AllBooks(w http.ResponseWriter, r *http.Request) {
+
+	books, err := app.DB.GetBooks()
 	if err != nil {
-		app.errorlog.Println(err)
+		app.badRequest(w, r, err)
 	}
 
-	if err = app.renderTemplate(w, r, "book", &templateData{
-		Data: data,
-	}, "booklist"); err != nil {
-		app.errorlog.Println(err)
-	}
+	app.writeJSON(w, http.StatusOK, books)
 }
 
 func (app *application) GetBook(w http.ResponseWriter, r *http.Request) {
 	strid := chi.URLParam(r, "id")
 	if i, err := strconv.Atoi(strid); err == nil {
-		b, err := app.DB.GetBook(i)
+		book, err := app.DB.GetBook(i)
 		if err != nil {
-			app.errorlog.Println(err)
-			return
+			app.badRequest(w, r, err)
 		}
-		out, err := json.MarshalIndent(b, "", "  ")
-		if err != nil {
-			app.errorlog.Println(err)
-			return
-		}
-		w.Header().Set("Content-Type", "application/json")
-		w.Write(out)
+
+		app.writeJSON(w, http.StatusOK, book)
 	}
 }
 
 func (app *application) DeleteBook(w http.ResponseWriter, r *http.Request) {
 
 	strid := chi.URLParam(r, "id")
+	app.infoLog.Println(strid)
 	if i, err := strconv.Atoi(strid); err == nil {
 		err = app.DB.DeleteBook(i)
 		if err != nil {
-			app.errorlog.Println(err)
+			app.badRequest(w, r, err)
 		}
 	}
-	data, err := app.loadAllBooks()
-	if err != nil {
-		app.errorlog.Println(err)
+
+	msg := message{
+		message: "book is deleted",
+		msgType: MsgTypeInfo,
 	}
 
-	if err := app.renderTemplate(w, r, "book", &templateData{
-		Data: data,
-	}, "booklist"); err != nil {
-		app.errorlog.Println(err)
+	app.writeJSON(w, http.StatusOK, msg)
+}
+
+func (app *application) EditBook(w http.ResponseWriter, r *http.Request) {
+	var b book
+	defer r.Body.Close()
+
+	err := json.NewDecoder(r.Body).Decode(&b)
+	if err != nil {
+		app.badRequest(w, r, err)
 	}
+
+	err = app.DB.UpdateBook(b.Id, b.Title, b.Price)
+	if err != nil {
+		app.badRequest(w, r, err)
+	}
+
+	msg := message{
+		message: "book is edited",
+		msgType: MsgTypeInfo,
+	}
+
+	app.writeJSON(w, http.StatusOK, msg)
 }
 
 func (app *application) SaveBook(w http.ResponseWriter, r *http.Request) {
-	err := r.ParseForm()
+	var b book
+	defer r.Body.Close()
+
+	err := json.NewDecoder(r.Body).Decode(&b)
 	if err != nil {
-		app.errorlog.Println(err)
-		return
+		app.badRequest(w, r, err)
+	}
+	app.infoLog.Println(b.Title)
+	_, err = app.DB.InsertBook(b.Title, b.Price)
+	if err != nil {
+		app.badRequest(w, r, err)
 	}
 
-	title := r.PostForm.Get("title")
-	price := r.PostForm.Get("price")
-	p, err := strconv.ParseFloat(price, 64)
-	if err != nil {
-		p = 0.0
+	msg := message{
+		message: "book is saved",
+		msgType: MsgTypeInfo,
 	}
 
-	id, err := app.DB.InsertBook(title, p)
-	if err != nil {
-		app.errorlog.Println(err)
-		return
-	}
-
-	err = app.writeJSON(w, http.StatusOK, map[string]interface{}{
-		"id": id,
-	}, nil)
-	if err != nil {
-		app.errorlog.Println(err)
-	}
-	http.Redirect(w, r, "/books", http.StatusSeeOther)
-}
-
-func (app *application) loadAllBooks() (map[string]interface{}, error) {
-	books, err := app.DB.GetBooks()
-	if err != nil {
-		return nil, err
-	}
-	data := make(map[string]interface{})
-	data["books"] = books
-	return data, nil
+	app.writeJSON(w, http.StatusOK, msg)
 }

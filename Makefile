@@ -4,6 +4,7 @@ gorun:
 	@go build -o bin/${BINARY_NAME} ./cmd
 
 run: gorun
+	clear
 	@./bin/${BINARY_NAME}
 	@echo "Backend running..."
 

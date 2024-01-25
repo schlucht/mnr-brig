@@ -28,6 +28,7 @@ func (m *DBModel) GetBooks() ([]*Book, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 	for rows.Next() {
 		var p Book
 		err = rows.Scan(
@@ -45,17 +46,21 @@ func (m *DBModel) GetBooks() ([]*Book, error) {
 	return Books, nil
 }
 
-func (m *DBModel) GetBook(id int) (*Book, error) {
+func (m *DBModel) GetBook(id int) (Book, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
-	var b *Book
+	var b Book
 
-	query := `SELECT book_id, book_title, book_price, created_at, updated_at 
+	query := `SELECT book_id, book_title, book_price 
 				FROM books 
 				WHERE deleted_at IS NULL AND book_id = ?
 			`
-	if err := m.DB.QueryRowContext(ctx, query, id).Scan(&b.ID, &b.Title, &b.Price); err != nil {
-		return nil, err
+	if err := m.DB.QueryRowContext(ctx, query, id).Scan(
+		&b.ID,
+		&b.Title,
+		&b.Price,
+	); err != nil {
+		return b, err
 	}
 
 	return b, nil
@@ -101,7 +106,11 @@ func (m *DBModel) UpdateBook(id int, title string, price float64) error {
 			SET updated_at = UTC_TIMESTAMP(), book_title = ?, book_price = ?
 			WHERE book_id = ?
 			`
-	_, err := m.DB.ExecContext(ctx, stmt, id)
+	_, err := m.DB.ExecContext(ctx, stmt,
+		title,
+		price,
+		id,
+	)
 	if err != nil {
 		return err
 	}
