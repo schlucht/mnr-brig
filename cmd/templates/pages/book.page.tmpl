@@ -14,16 +14,17 @@
                 <div class="controlItems">
                     <label for="title">Titel</label>
                     <input class="error" type="text" name="title" id="title">
-                    <ul id="error_title"></ul>
+                    <p id="error_title"></p>
                 </div>
                 <div class="controlItems">
                     <label for="price">Buch Preis</label>
                     <input class="error" type="number" name="price" id="price">
                     <ul id="error_price"></ul>
                 </div>
-                <div class="controlItems">
-                    <button id="btnNew" type="button">Buch hinzufügen</button>
-                    <button id="btnEdit" type="button">Buch ändern</button>
+                <div class="buttonItems">
+                    <button id="btnNew" type="button">Speichern</button>
+                    <button id="btnEdit" type="button">Ändern</button>
+                    <button id="btnCancel" type="button">Abbrechen</button>
                 </div>
             </form>
         </div>  
@@ -31,15 +32,19 @@
             {{ block "booklist" .}}{{end}}
         </div>
         {{ block "js" .}} {{ end }}
-        <script>   
+        <script> 
             document.addEventListener('DOMContentLoaded', async() => {
 				const btnEdit = document.getElementById('btnEdit')
 				const btnNew= document.getElementById('btnNew')				
                 const bookTable = document.getElementById('book-table')                
                 const tbl = bookTable.querySelector('tbody')
-
+                const title = document.getElementById('title')
+                const price = document.getElementById('price')
+                let rows
+                
 				btnEdit.style.display = 'none'
 				btnNew.style.display = 'block'
+                btnNew.disabled = btnEdit.disabled = true
 
                 const requestOptions= {
                     method: 'post',
@@ -56,9 +61,34 @@
                         if (book) {
                             let newRow = tbl.insertRow()                                             
                             for(let b in book) {
-                                let newCell = newRow.insertCell()
-                                let item = document.createTextNode(book[b])
-                                newCell.appendChild(item)
+                                if (b != 'book_sales') {
+                                    let newCell = newRow.insertCell()
+                                    let item = document.createTextNode(book[b])
+                                    newCell.appendChild(item)
+                                } else { 
+                                    if (book[b]) {    
+                                        let newRow = tbl.insertRow()
+                                        let newCell = newRow.insertCell()
+                                        newCell.classList.add('sales')
+                                        newCell.setAttribute('colspan', '4')
+                                        const t = document.createElement('table')                                        
+
+                                        for(let s of book[b]){  
+                                            let rh = t.insertRow()                                            
+
+                                            rh.innerHTML = `
+                                                <td>${s['sale_id']}</td>
+                                                <td>${new Date(s['sale_date']).toLocaleDateString()}</td>
+                                                <td>${s['sale_desc']}</td>
+                                            `
+                                            t.appendChild(rh)                                           
+                                        }
+                                        t.style.display = 'none'
+                                        t.classList.add(['detailTab','detailTabNone'])
+                                        newCell.appendChild(t)
+
+                                    }
+                                }
                             }
                             let newCell = newRow.insertCell() 
                             newCell.innerHTML= /*html*/`
@@ -66,14 +96,14 @@
                                 <button class="book-button" id="edit_${book.book_id}" >
                                     <img src="./assets/icons/pencil.svg" alt="edit">
                                 </button>
-                                <button class="book-button" id="delete_${book.book_id}"  class="book-button">
-                                    <img src="./assets/icons/delete.svg"  alt="edit">
+                                <button class="book-button" id="delete_${book.book_id}">
+                                    <img src="./assets/icons/delete.svg"  alt="delete">
                                 </button>
-                                <button class="book-button">
-                                    <img src="./assets/icons/dollar_white.svg" alt="edit">
+                                <button class="book-button" id="sale_${book.book_id}">
+                                    <img src="./assets/icons/dollar_white.svg" alt="sale">
                                 </button>
                             </div>
-                            `
+                            `                            
                             // Löschen eines Buches
                             document.getElementById('delete_'+ book.book_id).addEventListener('click',async (e) => {
                                 const delRequests = {
@@ -109,6 +139,13 @@
 								btnNew.style.display = 'none'
 
                             })
+
+                            // Buch kaufen
+                            document.getElementById('sale_' + book.book_id).addEventListener('click', async (e) => {
+                                console.log("Buch gefauft", book.book_id)
+                            })
+                            
+                            
                         }
                     })
                 } else {
@@ -117,11 +154,26 @@
                     newCell.setAttribute("colspan", "3")
                     newCell.innerHTML = "keine Bücher vorhanden"
                 }  
+                rows = tbl.getElementsByTagName('tr')
+                console.log(rows)
+                
+                //rows.forEach(row => {
+                for(let i = 0; i < rows.length; i++){
+                    rows[i].addEventListener('click', (e) => {
+                        const ele = e.currentTarget.nextElementSibling.querySelector('table')
+                        ele.classList.toggle("detailTabNone")
+                    })
+                }
+                //})
+                btnCancel.addEventListener('click', () => {
+                    location.href= '/book'
+                })
                 
 				// Editieren eines Eintrages
 				btnEdit.addEventListener('click', async(e) => {
 					if (!bookid.value) return
 					// TODO: Validieren der Eingaben
+
 					const book = {
 						id: +bookid.value,
 						title: title.value,
@@ -142,7 +194,7 @@
 
 				// Neuer Eintrag hinzufügen
 				btnNew.addEventListener('click', async(e) => {
-					// TODO: Validieren der Eingaben
+
 					const book = {						
 						title: title.value,
 						price: +price.value,
@@ -158,9 +210,22 @@
 					}
 					const saveResp = await fetch(`book/save`, saveRequests)
                     const data = await saveResp.json()
-				})                
+				})  
+                
+                title.addEventListener('input', (e) => {
+                    const input = e.target.value
+                    if (input.length > 2) {
+                        title.classList.remove('noValid')
+                        error_title.innerHTML = ""
+                        btnNew.disabled = btnEdit.disabled = false
+                    } else {
+                        console.log(e)
+                        title.classList.add('noValid')
+                        error_title.innerHTML= "Titelfeld muss > 2 Zeichen"
+                        btnNew.disabled = btnEdit.disabled = true
+                    }
+                })  
             })
-
         </script>
     </section>
 {{ end }}

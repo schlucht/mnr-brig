@@ -9,3 +9,5 @@ function stringIsValidate(txt) {
     return txt ? true : false
 }
 
+
+

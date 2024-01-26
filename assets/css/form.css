@@ -11,9 +11,13 @@ form {
         margin-top: 1rem;        
         border-radius: 0.5rem; 
     }
+    & .buttonItems {
+        margin-top: .5rem;
+        display: flex;
+        flex-direction: row;
+        gap: 0.2rem;
+    }
 }
-
-
 
 input {
     width: 100%;
@@ -25,15 +29,13 @@ input {
     &:focus {
         outline: none;
         border: solid 1px var(--color-primary);
-    }   
-    &:required{
-        background-color:  var(--color-red);
     }
-    &:valid{
-        border: solid 1px var(--color-green);
-    }  
+    &.noValid {
+        border: solid 1px var(--color-red);
+        background-color: rgba(255, 0, 0,0.2);
+    }   
+     
 }
-
 
 textarea {
     width: 100%;
@@ -56,6 +58,10 @@ button {
     color: var(--color-white);
     cursor: pointer;
     &:hover {
+        background-color: rgba(0,0,0,.1);
+        color: var(--color-white);
+    }
+    &:disabled {
         background-color: rgba(0,0,0,.1);
         color: var(--color-white);
     }

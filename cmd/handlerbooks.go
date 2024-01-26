@@ -6,13 +6,8 @@ import (
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/schlucht/mnrNaters/internal/models"
 )
-
-type book struct {
-	Id    int
-	Title string
-	Price float64
-}
 
 func (app *application) Book(w http.ResponseWriter, r *http.Request) {
 
@@ -24,6 +19,14 @@ func (app *application) Book(w http.ResponseWriter, r *http.Request) {
 func (app *application) AllBooks(w http.ResponseWriter, r *http.Request) {
 
 	books, err := app.DB.GetBooks()
+	for i, b := range books {
+		sales, err := app.DB.GetSales(b.ID)
+		if err != nil {			
+			b.Sales = []*models.Sale{}
+		}		
+		books[i].Sales = sales
+	}
+
 	if err != nil {
 		app.badRequest(w, r, err)
 	}
@@ -63,15 +66,18 @@ func (app *application) DeleteBook(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) EditBook(w http.ResponseWriter, r *http.Request) {
-	var b book
+	var b models.Book
 	defer r.Body.Close()
 
 	err := json.NewDecoder(r.Body).Decode(&b)
 	if err != nil {
 		app.badRequest(w, r, err)
 	}
-
-	err = app.DB.UpdateBook(b.Id, b.Title, b.Price)
+	f, err := strconv.ParseFloat(b.Price, 64)
+	if err != nil {
+		f = 0.0
+	}
+	err = app.DB.UpdateBook(b.ID, b.Title, f)
 	if err != nil {
 		app.badRequest(w, r, err)
 	}
@@ -85,15 +91,18 @@ func (app *application) EditBook(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) SaveBook(w http.ResponseWriter, r *http.Request) {
-	var b book
+	var b models.Book
 	defer r.Body.Close()
 
 	err := json.NewDecoder(r.Body).Decode(&b)
 	if err != nil {
 		app.badRequest(w, r, err)
 	}
-	app.infoLog.Println(b.Title)
-	_, err = app.DB.InsertBook(b.Title, b.Price)
+	f, err := strconv.ParseFloat(b.Price, 64)
+	if err != nil {
+		f = 0.0
+	}
+	_, err = app.DB.InsertBook(b.Title, f)
 	if err != nil {
 		app.badRequest(w, r, err)
 	}
