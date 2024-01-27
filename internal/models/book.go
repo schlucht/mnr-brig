@@ -8,7 +8,7 @@ import (
 type Book struct {
 	ID        int       `json:"book_id"`
 	Title     string    `json:"book_title"`
-	Price     string    `json:"book_price"`
+	Price     float64   `json:"book_price"`
 	Sales     []*Sale   `json:"book_sales"`
 	UpdatedAt time.Time `json:"-"`
 	CreatedAt time.Time `json:"-"`
@@ -112,11 +112,11 @@ func (m *DBModel) UpdateBook(id int, title string, price float64) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	stmt := `UPDATE books 
+	sql := `UPDATE books 
 			SET updated_at = UTC_TIMESTAMP(), book_title = ?, book_price = ?
 			WHERE book_id = ?
 			`
-	_, err := m.DB.ExecContext(ctx, stmt,
+	_, err := m.DB.ExecContext(ctx, sql,
 		title,
 		price,
 		id,
@@ -165,4 +165,26 @@ func (m *DBModel) GetSales(idBook int) ([]*Sale, error) {
 	}
 
 	return sales, nil
+}
+
+func (m *DBModel) InsertSale(sale Sale) (int, error) {
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+	sql := `INSERT sales (book_id, sale_date, sale_desc)
+					VALUES (?, ?, ?, ?);`
+
+	result, err := m.DB.ExecContext(ctx, sql,
+		sale.BookId,
+		sale.Date,
+		sale.Text,
+	)
+	if err != nil {
+		return 0, err
+	}
+	id, err := result.LastInsertId()
+	if err != nil {
+		return 0, nil
+	}
+	return int(id), nil
 }

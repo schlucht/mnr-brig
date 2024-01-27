@@ -1,97 +1,98 @@
 {{template "base" .}}
 
 {{ define "title" }}
-    MNR - Naters - Bücher
+MNR - Naters - Bücher
 {{ end }}
 
-{{ define "content" }} 
-    <h2>MNR Bücher</h2>    
-    <section class="book">
-        <div class="book-form border">
-            <h3>Neue Bücher</h3>
-            <form id="frmBook">
-				<input id="bookid" type="hidden">
-                <div class="controlItems">
-                    <label for="title">Titel</label>
-                    <input class="error" type="text" name="title" id="title">
-                    <p id="error_title"></p>
-                </div>
-                <div class="controlItems">
-                    <label for="price">Buch Preis</label>
-                    <input class="error" type="number" name="price" id="price">
-                    <ul id="error_price"></ul>
-                </div>
-                <div class="buttonItems">
-                    <button id="btnNew" type="button">Speichern</button>
-                    <button id="btnEdit" type="button">Ändern</button>
-                    <button id="btnCancel" type="button">Abbrechen</button>
-                </div>
-            </form>
-        </div>  
-        <div class="book-list border">
-            {{ block "booklist" .}}{{end}}
-        </div>
-        {{ block "js" .}} {{ end }}
-        <script> 
-            document.addEventListener('DOMContentLoaded', async() => {
-				const btnEdit = document.getElementById('btnEdit')
-				const btnNew= document.getElementById('btnNew')				
-                const bookTable = document.getElementById('book-table')                
-                const tbl = bookTable.querySelector('tbody')
-                const title = document.getElementById('title')
-                const price = document.getElementById('price')
-                let rows
-                
-				btnEdit.style.display = 'none'
-				btnNew.style.display = 'block'
-                btnNew.disabled = btnEdit.disabled = true
+{{ define "content" }}
+<h2>MNR Bücher</h2>
+{{ block "saleInfo" .}}{{ end }}
+<section class="book">
+    <div class="book-form border">
+        <h3>Neue Bücher</h3>
+        <form id="frmBook">
+            <input id="bookid" type="hidden">
+            <div class="controlItems">
+                <label for="title">Titel</label>
+                <input class="error" type="text" name="title" id="title">
+                <p id="error_title"></p>
+            </div>
+            <div class="controlItems">
+                <label for="price">Buch Preis</label>
+                <input class="error" type="number" name="price" id="price">
+                <ul id="error_price"></ul>
+            </div>
+            <div class="buttonItems">
+                <button id="btnNew" type="button">Speichern</button>
+                <button id="btnEdit" type="button">Ändern</button>
+                <button id="btnCancel" type="button">Abbrechen</button>
+            </div>
+        </form>
+    </div>
+    <div class="book-list border">
+        {{ block "booklist" .}}{{end}}
+    </div>
+    {{ block "js" .}} {{ end }}
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const btnEdit = document.getElementById('btnEdit')
+            const btnNew = document.getElementById('btnNew')
+            const bookTable = document.getElementById('book-table')
+            const tbl = bookTable.querySelector('tbody')
+            const title = document.getElementById('title')
+            const price = document.getElementById('price')
+            let rows
 
-                const requestOptions= {
-                    method: 'post',
-                    headers: {
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json',
-                    },
-                }
-                const resp = await fetch(`/book/all`, requestOptions)
-                const data = await resp.json()                
-                if (data) {
-                    
-                    data.forEach((book) =>  {
-                        if (book) {
-                            let newRow = tbl.insertRow()                                             
-                            for(let b in book) {
-                                if (b != 'book_sales') {
+            btnEdit.style.display = 'none'
+            btnNew.style.display = 'block'
+            btnNew.disabled = btnEdit.disabled = true
+
+            const requestOptions = {
+                method: 'post',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                },
+            }
+            const resp = await fetch(`/book/all`, requestOptions)
+            const data = await resp.json()
+            if (data) {
+
+                data.forEach((book) => {
+                    if (book) {
+                        let newRow = tbl.insertRow()
+                        for (let b in book) {
+                            if (b != 'book_sales') {
+                                let newCell = newRow.insertCell()
+                                let item = document.createTextNode(book[b])
+                                newCell.appendChild(item)
+                            } else {
+                                if (book[b]) {
+                                    let newRow = tbl.insertRow()
                                     let newCell = newRow.insertCell()
-                                    let item = document.createTextNode(book[b])
-                                    newCell.appendChild(item)
-                                } else { 
-                                    if (book[b]) {    
-                                        let newRow = tbl.insertRow()
-                                        let newCell = newRow.insertCell()
-                                        newCell.classList.add('sales')
-                                        newCell.setAttribute('colspan', '4')
-                                        const t = document.createElement('table')                                        
+                                    newCell.classList.add('sales')
+                                    newCell.setAttribute('colspan', '4')
+                                    newCell.classList.add('sales-table-container')
+                                    const t = document.createElement('table')
+                                    t.classList.add('sales-table')
+                                    for (let s of book[b]) {
+                                        let rh = t.insertRow()
 
-                                        for(let s of book[b]){  
-                                            let rh = t.insertRow()                                            
-
-                                            rh.innerHTML = `
+                                        rh.innerHTML = `
                                                 <td>${s['sale_id']}</td>
                                                 <td>${new Date(s['sale_date']).toLocaleDateString()}</td>
                                                 <td>${s['sale_desc']}</td>
                                             `
-                                            t.appendChild(rh)                                           
-                                        }
-                                        t.style.display = 'none'
-                                        t.classList.add(['detailTab','detailTabNone'])
-                                        newCell.appendChild(t)
-
+                                        t.appendChild(rh)
                                     }
+                                    t.classList.add('detailTab', 'detailTabNone')
+                                    newCell.appendChild(t)
+
                                 }
                             }
-                            let newCell = newRow.insertCell() 
-                            newCell.innerHTML= /*html*/`
+                        }
+                        let newCell = newRow.insertCell()
+                        newCell.innerHTML = /*html*/`
                             <div class="book-admin">
                                 <button class="book-button" id="edit_${book.book_id}" >
                                     <img src="./assets/icons/pencil.svg" alt="edit">
@@ -103,129 +104,125 @@
                                     <img src="./assets/icons/dollar_white.svg" alt="sale">
                                 </button>
                             </div>
-                            `                            
-                            // Löschen eines Buches
-                            document.getElementById('delete_'+ book.book_id).addEventListener('click',async (e) => {
-                                const delRequests = {
-                                    method: "delete",
-                                    headers: {
-                                        'Accept': 'application/json',
-                                        'Content-Type': 'application/json',
-                                    },
-                                }
-                                const delResp = await fetch(`/book/delete/${book.book_id}`, delRequests)
-                                const data = delResp.json()
-                                console.log(data)
-                                location.href = "/book"
-                            })
+                            `
+                        // Löschen eines Buches
+                        document.getElementById('delete_' + book.book_id).addEventListener('click', async (e) => {
+                            const delRequests = {
+                                method: "delete",
+                                headers: {
+                                    'Accept': 'application/json',
+                                    'Content-Type': 'application/json',
+                                },
+                            }
+                            const delResp = await fetch(`/book/delete/${book.book_id}`, delRequests)
+                            const data = delResp.json()
+                            console.log(data)
+                            location.href = "/book"
+                        })
 
-                            // Editieren eines Buches
-                            document.getElementById('edit_' + book.book_id).addEventListener('click', async (e) => { 		
-								const editRequests = {
-									method: "post",
-									headers: {
-										'Accept': 'application/json',
-										'Content-Type': 'application/json',
-									},									
-								}						
-								const editResp = await fetch(`book/${book.book_id}`, editRequests)
-                    			const data = await editResp.json()
-                          
-                                title.value = data.book_title
-								price.value = data.book_price  
-								bookid.value = data.book_id
+                        // Editieren eines Buches
+                        document.getElementById('edit_' + book.book_id).addEventListener('click', async (e) => {
+                            const editRequests = {
+                                method: "post",
+                                headers: {
+                                    'Accept': 'application/json',
+                                    'Content-Type': 'application/json',
+                                },
+                            }
+                            const editResp = await fetch(`book/${book.book_id}`, editRequests)
+                            const data = await editResp.json()
 
-								btnEdit.style.display = 'block'
-								btnNew.style.display = 'none'
+                            title.value = data.book_title
+                            price.value = data.book_price
+                            bookid.value = data.book_id
 
-                            })
+                            btnEdit.style.display = 'block'
+                            btnNew.style.display = 'none'
 
-                            // Buch kaufen
-                            document.getElementById('sale_' + book.book_id).addEventListener('click', async (e) => {
-                                console.log("Buch gefauft", book.book_id)
-                            })
-                            
-                            
-                        }
-                    })
-                } else {
-                    let newRow = tbody.insertRow()
-                    let newCell = newRow.insertCell()
-                    newCell.setAttribute("colspan", "3")
-                    newCell.innerHTML = "keine Bücher vorhanden"
-                }  
-                rows = tbl.getElementsByTagName('tr')
-                console.log(rows)
-                
-                //rows.forEach(row => {
-                for(let i = 0; i < rows.length; i++){
-                    rows[i].addEventListener('click', (e) => {
-                        const ele = e.currentTarget.nextElementSibling.querySelector('table')
-                        ele.classList.toggle("detailTabNone")
-                    })
-                }
-                //})
-                btnCancel.addEventListener('click', () => {
-                    location.href= '/book'
-                })
-                
-				// Editieren eines Eintrages
-				btnEdit.addEventListener('click', async(e) => {
-					if (!bookid.value) return
-					// TODO: Validieren der Eingaben
+                        })
 
-					const book = {
-						id: +bookid.value,
-						title: title.value,
-						price: +price.value
-					}
-					const editRequests = {
-						method: "put",
-						headers: {
-							'Accept': 'application/json',
-							'Content-Type': 'application/json',
-						},
-						body: JSON.stringify(book),
-					}
-					const editResp = await fetch(`book/edit/${book.book_id}`, editRequests)
-                    const data = await editResp.json()
-					
-				})
+                        // Buch kaufen
+                        document.getElementById('sale_' + book.book_id).addEventListener('click', async (e) => {
+                            console.log("Buch gefauft", book.book_id)
+                        })
 
-				// Neuer Eintrag hinzufügen
-				btnNew.addEventListener('click', async(e) => {
-
-					const book = {						
-						title: title.value,
-						price: +price.value,
-					}
-					console.log(book)
-					const saveRequests = {
-						method: "post",
-						headers: {
-							'Accept': 'application/json',
-							'Content-Type': 'application/json',
-						},
-						body: JSON.stringify(book),
-					}
-					const saveResp = await fetch(`book/save`, saveRequests)
-                    const data = await saveResp.json()
-				})  
-                
-                title.addEventListener('input', (e) => {
-                    const input = e.target.value
-                    if (input.length > 2) {
-                        title.classList.remove('noValid')
-                        error_title.innerHTML = ""
-                        btnNew.disabled = btnEdit.disabled = false
-                    } else {
-                        console.log(e)
-                        title.classList.add('noValid')
-                        error_title.innerHTML= "Titelfeld muss > 2 Zeichen"
-                        btnNew.disabled = btnEdit.disabled = true
                     }
-                })  
+                })
+            } else {
+                let newRow = tbody.insertRow()
+                let newCell = newRow.insertCell()
+                newCell.setAttribute("colspan", "3")
+                newCell.innerHTML = "keine Bücher vorhanden"
+            }
+            rows = tbl.getElementsByTagName('tr')
+
+            for (let i = 0; i < rows.length; i++) {
+                rows[i].addEventListener('click', (e) => {
+                    const ele = e.currentTarget.nextElementSibling.querySelector('table')
+                    ele.classList.toggle("detailTabNone")
+                })
+            }
+
+            btnCancel.addEventListener('click', () => {
+                location.href = '/book'
             })
-        </script>
-    </section>
+
+            // Editieren eines Eintrages
+            btnEdit.addEventListener('click', async (e) => {
+                if (!bookid.value) return
+                // TODO: Validieren der Eingaben
+
+                const book = {
+                    id: +bookid.value,
+                    title: title.value,
+                    price: +price.value
+                }
+                const editRequests = {
+                    method: "put",
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(book),
+                }
+                const editResp = await fetch(`book/edit/${book.book_id}`, editRequests)
+                const data = await editResp.json()
+
+            })
+
+            // Neuer Eintrag hinzufügen
+            btnNew.addEventListener('click', async (e) => {
+
+                const book = {
+                    book_title: title.value,
+                    book_price: +price.value,
+                }
+                console.log(book)
+                const saveRequests = {
+                    method: "post",
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(book),
+                }
+                const saveResp = await fetch(`book/save`, saveRequests)
+                const data = await saveResp.json()
+            })
+
+            title.addEventListener('input', (e) => {
+                const input = e.target.value
+                if (input.length > 2) {
+                    title.classList.remove('noValid')
+                    error_title.innerHTML = ""
+                    btnNew.disabled = btnEdit.disabled = false
+                } else {
+                    title.classList.add('noValid')
+                    error_title.innerHTML = "Titelfeld muss > 2 Zeichen"
+                    btnNew.disabled = btnEdit.disabled = true
+                }
+            })
+        })
+    </script>
+</section>
 {{ end }}

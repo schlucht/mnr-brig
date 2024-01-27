@@ -1,5 +1,7 @@
-{
-    "livePreview.defaultPreviewPath": "/workspaces/backen/index.html",
+{    
     "editor.insertSpaces": true,
-    "editor.tabSize": 4
+    "editor.tabSize": 4,
+    "editor.fontSize": 16,
+    "terminal.integrated.fontFamily": "Menlo, Monaco, 'Courier New', monospace",
+    "editor.fontFamily": "'Courier New, Menlo, Monaco, monospace",
 }

@@ -1,29 +1,33 @@
-table{
+table {
     overflow-y: auto;
     width: 100%;
-   & thead {
+
+    & thead {
         & tr {
-             & th {
+            & th {
                 background-color: var(--color-gray-dark);
                 color: var(--color-white);
                 border: 0.1rem solid var(--color-gray-dark);
                 padding: 0.2rem;
                 text-align: center;
-             }
+            }
         }
-   }
-   & tbody {
+    }
+
+    & tbody {
         & tr {
             & td {
                 border: 0.1rem solid #ddd;
                 padding: 0.4rem;
-            }   
+            }
         }
+
         & tr:nth-child(even) {
-            background-color: rgba(0,0,0,.05);
+            background-color: rgba(0, 0, 0, .05);
         }
-   }
-   button {
+    }
+
+    button {
         background-color: var(--color-gray-dark);
         border: none;
         color: var(--color-white);
@@ -37,17 +41,42 @@ table{
         border-radius: 0.5rem;
         height: 3.2rem;
         width: 3.2rem;
+
         &:hover {
             background-color: #45a049;
         }
+
         & img {
             width: 1.5rem;
             height: 1.5rem;
             pointer-events: none;
+
             & svg {
                 fill: red;
             }
         }
-        
-   }
+
+    }
+}
+
+.sales-table {
+    background-color: #45a049;
+    color: var(--color-white);
+    border: 0.1rem solid #ddd;
+    padding: 0.4rem;
+    text-align: center;
+
+
+    & tr {
+        & td:last-child {
+            border: 0.1rem solid #ddd;
+            padding: 0.4rem;
+            text-align: left;
+        }
+    }
+}
+
+.sales-table-constainer {
+    background-color: #45a049;
+    padding-left: 1rem;
 }

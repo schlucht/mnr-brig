@@ -11,8 +11,8 @@ import (
 
 func (app *application) Book(w http.ResponseWriter, r *http.Request) {
 
-	if err := app.renderTemplate(w, r, "book", &templateData{}, "booklist"); err != nil {
-		app.errorlog.Println(err)
+	if err := app.renderTemplate(w, r, "book", &templateData{}, "booklist", "saleInfo"); err != nil {
+		app.errorlog.Fatalln(err)
 	}
 }
 
@@ -21,17 +21,21 @@ func (app *application) AllBooks(w http.ResponseWriter, r *http.Request) {
 	books, err := app.DB.GetBooks()
 	for i, b := range books {
 		sales, err := app.DB.GetSales(b.ID)
-		if err != nil {			
+		if err != nil {
 			b.Sales = []*models.Sale{}
-		}		
+		}
 		books[i].Sales = sales
 	}
 
 	if err != nil {
-		app.badRequest(w, r, err)
+		if err = app.badRequest(w, r, err); err != nil {
+			app.errorlog.Fatalln(err)
+		}
 	}
 
-	app.writeJSON(w, http.StatusOK, books)
+	if err = app.writeJSON(w, http.StatusOK, books); err != nil {
+		app.errorlog.Fatalln(err)
+	}
 }
 
 func (app *application) GetBook(w http.ResponseWriter, r *http.Request) {
@@ -39,21 +43,27 @@ func (app *application) GetBook(w http.ResponseWriter, r *http.Request) {
 	if i, err := strconv.Atoi(strid); err == nil {
 		book, err := app.DB.GetBook(i)
 		if err != nil {
-			app.badRequest(w, r, err)
+			if err = app.badRequest(w, r, err); err != nil {
+				app.errorlog.Fatal(err)
+			}
 		}
 
-		app.writeJSON(w, http.StatusOK, book)
+		if err = app.writeJSON(w, http.StatusOK, book); err != nil {
+			app.errorlog.Fatal(err)
+		}
 	}
 }
 
 func (app *application) DeleteBook(w http.ResponseWriter, r *http.Request) {
 
 	strid := chi.URLParam(r, "id")
-	app.infoLog.Println(strid)
+	app.infoLog.Fatalln(strid)
 	if i, err := strconv.Atoi(strid); err == nil {
 		err = app.DB.DeleteBook(i)
 		if err != nil {
-			app.badRequest(w, r, err)
+			if err = app.badRequest(w, r, err); err != nil {
+				app.errorlog.Fatalln(err)
+			}
 		}
 	}
 
@@ -62,7 +72,9 @@ func (app *application) DeleteBook(w http.ResponseWriter, r *http.Request) {
 		msgType: MsgTypeInfo,
 	}
 
-	app.writeJSON(w, http.StatusOK, msg)
+	if err := app.writeJSON(w, http.StatusOK, msg); err != nil {
+		app.errorlog.Fatalln(err)
+	}
 }
 
 func (app *application) EditBook(w http.ResponseWriter, r *http.Request) {
@@ -71,15 +83,17 @@ func (app *application) EditBook(w http.ResponseWriter, r *http.Request) {
 
 	err := json.NewDecoder(r.Body).Decode(&b)
 	if err != nil {
-		app.badRequest(w, r, err)
+		if err = app.badRequest(w, r, err); err != nil {
+			app.errorlog.Fatalln(err)
+		}
 	}
-	f, err := strconv.ParseFloat(b.Price, 64)
+
+	err = app.DB.UpdateBook(b.ID, b.Title, b.Price)
 	if err != nil {
-		f = 0.0
-	}
-	err = app.DB.UpdateBook(b.ID, b.Title, f)
-	if err != nil {
-		app.badRequest(w, r, err)
+		err = app.badRequest(w, r, err)
+		{
+			app.errorlog.Fatalln(err)
+		}
 	}
 
 	msg := message{
@@ -87,24 +101,29 @@ func (app *application) EditBook(w http.ResponseWriter, r *http.Request) {
 		msgType: MsgTypeInfo,
 	}
 
-	app.writeJSON(w, http.StatusOK, msg)
+	if err = app.writeJSON(w, http.StatusOK, msg); err != nil {
+		app.errorlog.Fatalln(err)
+	}
 }
 
+// Speichert ein neues Buch in der DB
 func (app *application) SaveBook(w http.ResponseWriter, r *http.Request) {
 	var b models.Book
 	defer r.Body.Close()
 
 	err := json.NewDecoder(r.Body).Decode(&b)
+
 	if err != nil {
-		app.badRequest(w, r, err)
+		if err = app.badRequest(w, r, err); err != nil {
+			app.errorlog.Fatalln(err)
+		}
 	}
-	f, err := strconv.ParseFloat(b.Price, 64)
+
+	_, err = app.DB.InsertBook(b.Title, b.Price)
 	if err != nil {
-		f = 0.0
-	}
-	_, err = app.DB.InsertBook(b.Title, f)
-	if err != nil {
-		app.badRequest(w, r, err)
+		if err = app.badRequest(w, r, err); err != nil {
+			app.errorlog.Fatalln(err)
+		}
 	}
 
 	msg := message{
@@ -112,5 +131,34 @@ func (app *application) SaveBook(w http.ResponseWriter, r *http.Request) {
 		msgType: MsgTypeInfo,
 	}
 
-	app.writeJSON(w, http.StatusOK, msg)
+	if err = app.writeJSON(w, http.StatusOK, msg); err != nil {
+		app.errorlog.Fatalln(err)
+	}
+}
+
+// Speichert ein gekauftes Buch in der Datenbank
+func (app *application) SaveSale(w http.ResponseWriter, r *http.Request) {
+	var s models.Sale
+	defer r.Body.Close()
+
+	err := json.NewDecoder(r.Body).Decode(&s)
+	if err != nil {
+		if err = app.badRequest(w, r, err); err != nil {
+			app.errorlog.Fatalln(err)
+		}
+	}
+	_, err = app.DB.InsertSale(s)
+	if err != nil {
+		if err = app.badRequest(w, r, err); err != nil {
+			app.errorlog.Fatalln(err)
+		}
+	}
+	msg := message{
+		message: "sale is saved",
+		msgType: MsgTypeInfo,
+	}
+
+	if err = app.writeJSON(w, http.StatusOK, msg); err != nil {
+		app.errorlog.Fatalln(err)
+	}
 }
