@@ -1,37 +1,62 @@
 .container {
-  width: 80%;
-  max-width: 80%;
-  margin: 0 auto;
-  padding: 0 2rem;
-  background-color: var(--color-gray);
+	width: 80%;
+	max-width: 80%;
+	margin: 0 auto;
+	padding: 0 2rem;
+	background-color: var(--color-gray);
 }
 
 .section {
-  position: absolute;
-  top: 0;
-  width: 80%;
-  max-width: 760px;
-  background-color: var(--color-gray-dark);
-  color: var(--color-black);
+	position: absolute;
+	top: 0;
+	width: 80%;
+	max-width: 760px;
+	background-color: var(--color-gray-dark);
+	color: var(--color-black);
 
 }
 
 main {
-  z-index: 99999;
-  padding: 0rem 2rem 2rem 2rem;
-  margin: 0 2rem 0.1rem 2rem;
-  border-radius: .2rem;
-  box-shadow: -.1rem -.1rem 0rem .1rem rgba(0, 0, 0, 0.5),
-    .1rem .1rem 0rem .1rem white;
-
+	z-index: 99999;
+	padding: 0rem 2rem 2rem 2rem;
+	margin: 0 2rem 0.1rem 2rem;
+	border-radius: .2rem;
+	box-shadow: -.1rem -.1rem 0rem .1rem rgba(0, 0, 0, 0.5),
+		.1rem .1rem 0rem .1rem white;
 }
 
 section {
-  background-color: var(--color-gray-light);
-  padding: .4rem .4rem .4rem .4rem;
+	background-color: var(--color-gray-light);
+	padding: .4rem .4rem .4rem .4rem;
 }
 
 .border {
-  box-shadow: -.1rem -.1rem 0rem .1rem rgba(0, 0, 0, 0.5),
-    .1rem .1rem 0rem .1rem white;
+	box-shadow: -.1rem -.1rem 0rem .1rem rgba(0, 0, 0, 0.5),
+		.1rem .1rem 0rem .1rem white;
+}
+
+.wrapper {
+	position: absolute;	
+	top: 0;
+	left: 0;
+	right: 0;
+	height: 100vh;
+	display: none;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	background-color: rgba(0, 0, 0, 0.5);
+	z-index: 99999;
+	& .info-container {
+		padding: 1rem;
+		border-radius: .5rem;
+		box-shadow: 1px 1px 5px 1px rgba(255, 255, 255, 0.5);
+	}
+     	& h3 {
+    		text-align: center;
+  	}
+}
+
+.show {
+	display: flex;
 }

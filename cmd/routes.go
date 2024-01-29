@@ -29,6 +29,14 @@ func (app *application) routes() http.Handler {
 		mux.Delete("/delete/{id}", app.DeleteBook)
 		mux.Post("/{id}", app.GetBook)
 	})
+	mux.Route("/sale", func(mux chi.Router) {
+		// mux.Get("/", app.Sale)
+		// mux.Post("/all", app.AllSales)
+		// mux.Put("/edit/{id}", app.EditSale)
+		mux.Post("/save", app.SaveSale)
+		// mux.Delete("/delete/{id}", app.DeleteSale)
+		// mux.Post("/{id}", app.GetSale)
+	})
 
 	// Donate routes
 	mux.Get("/donate", app.Donate)

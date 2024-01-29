@@ -147,12 +147,14 @@ func (app *application) SaveSale(w http.ResponseWriter, r *http.Request) {
 			app.errorlog.Fatalln(err)
 		}
 	}
+
 	_, err = app.DB.InsertSale(s)
 	if err != nil {
 		if err = app.badRequest(w, r, err); err != nil {
 			app.errorlog.Fatalln(err)
 		}
 	}
+
 	msg := message{
 		message: "sale is saved",
 		msgType: MsgTypeInfo,

@@ -1,21 +1,66 @@
 {{ define "saleInfo" }}
-  <div class="wrapper">
-        <section class="info-container">
-            <h3 class="info-title">
-                Hier der Buchtitel
-            </h3>
-            <form id="frm-info">
-                <div class="controlItems">
-                    <input type="date" id="info-date" name="info-date">
-                    <textarea id="info-input-text" name="info-input-text" rows="4" cols="50">
-                        Beschreibung zum Buchkauf...
-                    </textarea>
-                    </div>
-                    <div class="buttonItems">
-                    <button type="button">Speichern</button>
-                    <button type="button">Abbrechen</button>
-                </div>
-            </form>
-        </section>
-  </div>
+<div class="wrapper">
+    <section class="info-container">
+        <h3 class="info-title">
+            Hier der Buchtitel
+        </h3>
+        <form id="frm-info">
+            <div class="controlItems">
+                <input type="text" id="book-id" name="book-id">
+                <input type="date" id="sale-date" name="sale-date">
+                <textarea id="sale-desc" name="sale-desc" rows="5" cols="50">
+                </textarea>
+            </div>
+            <div class="buttonItems">
+                <button type="button" id="sale-save">Speichern</button>
+                <button type="button" id="sale-cancel">Abbrechen</button>
+            </div>
+        </form>
+    </section>
+</div>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const saleDate = document.getElementById("sale-date");
+        const saleDesc = document.getElementById("sale-desc");
+        const saleSave = document.getElementById("sale-save");
+        const saleCancel = document.getElementById("sale-cancel");
+        const bookID = document.getElementById("book-id");
+
+        saleCancel.addEventListener("click", () => {
+            closeInfo();
+        });
+
+        saleSave.addEventListener("click", async () => {
+            const d = new Date(saleDate.value);
+            const body = {
+                "sale_date": d.toJSON(),
+                "sale_desc": saleDesc.value,
+                "book_id": +bookID.value,
+            };
+            const requestOptions = {
+                method: 'post',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(body),
+            }
+            console.log(JSON.stringify(body));
+            const url = "/sale/save";
+            try {
+                const response = await fetch(url, requestOptions);
+                const data = await response.json();
+
+            } catch (error) {
+                console.error({ message: "Error save sale", error: error });
+            }
+        });
+        closeInfo();
+    })
+    function closeInfo() {
+        document.getElementById("frm-info").reset();
+        document.querySelector(".wrapper").classList.remove("show");
+    }
+</script>
+
 {{ end }}

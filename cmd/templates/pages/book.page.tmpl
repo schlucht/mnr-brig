@@ -7,6 +7,7 @@ MNR - Naters - Bücher
 {{ define "content" }}
 <h2>MNR Bücher</h2>
 {{ block "saleInfo" .}}{{ end }}
+{{ block "spinner" .}}{{ end }}
 <section class="book">
     <div class="book-form border">
         <h3>Neue Bücher</h3>
@@ -41,6 +42,8 @@ MNR - Naters - Bücher
             const tbl = bookTable.querySelector('tbody')
             const title = document.getElementById('title')
             const price = document.getElementById('price')
+            const wrapper = document.querySelector('.wrapper')
+            const spinner = document.querySelector('.spinner')
             let rows
 
             btnEdit.style.display = 'none'
@@ -54,6 +57,8 @@ MNR - Naters - Bücher
                     'Content-Type': 'application/json',
                 },
             }
+
+            spinner.classList.add('show')
             const resp = await fetch(`/book/all`, requestOptions)
             const data = await resp.json()
             if (data) {
@@ -105,6 +110,7 @@ MNR - Naters - Bücher
                                 </button>
                             </div>
                             `
+
                         // Löschen eines Buches
                         document.getElementById('delete_' + book.book_id).addEventListener('click', async (e) => {
                             const delRequests = {
@@ -116,7 +122,7 @@ MNR - Naters - Bücher
                             }
                             const delResp = await fetch(`/book/delete/${book.book_id}`, delRequests)
                             const data = delResp.json()
-                            console.log(data)
+
                             location.href = "/book"
                         })
 
@@ -143,7 +149,20 @@ MNR - Naters - Bücher
 
                         // Buch kaufen
                         document.getElementById('sale_' + book.book_id).addEventListener('click', async (e) => {
-                            console.log("Buch gefauft", book.book_id)
+
+                            const inputDate = document.querySelector('#sale-date')
+                            const inputDesc = document.querySelector('#sale-desc')
+                            const saveSale = document.querySelector('#sale-save')
+                            const cancelSale = document.querySelector('#sale-cancel')
+                            const title = document.querySelector('.info-title')
+                            const id = document.querySelector('#book-id')
+
+                            title.innerHTML = book.book_title
+                            inputDate.value = new Date().toISOString().slice(0, 10)
+                            id.value = book.book_id
+
+                            wrapper.classList.add('show')
+
                         })
 
                     }
@@ -162,6 +181,7 @@ MNR - Naters - Bücher
                     ele.classList.toggle("detailTabNone")
                 })
             }
+            spinner.classList.remove('show')
 
             btnCancel.addEventListener('click', () => {
                 location.href = '/book'

@@ -18,7 +18,7 @@ type Sale struct {
 	ID        int       `json:"sale_id"`
 	Date      time.Time `json:"sale_date"`
 	Text      string    `json:"sale_desc"`
-	BookId    int       `json:"sale_book_id"`
+	BookId    int       `json:"book_id"`
 	UpdatedAt time.Time `json:"-"`
 	CreatedAt time.Time `json:"-"`
 }
@@ -168,17 +168,17 @@ func (m *DBModel) GetSales(idBook int) ([]*Sale, error) {
 }
 
 func (m *DBModel) InsertSale(sale Sale) (int, error) {
-
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 	sql := `INSERT sales (book_id, sale_date, sale_desc)
-					VALUES (?, ?, ?, ?);`
+					VALUES (?, ?, ?);`
 
 	result, err := m.DB.ExecContext(ctx, sql,
 		sale.BookId,
 		sale.Date,
 		sale.Text,
 	)
+
 	if err != nil {
 		return 0, err
 	}
